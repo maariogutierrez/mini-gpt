@@ -1,0 +1,8 @@
+torch
+tiktoken
+datasets
+wandb
+fastapi
+uvicorn
+numpy
+tqdm
