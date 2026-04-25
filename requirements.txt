@@ -6,3 +6,4 @@ fastapi
 uvicorn
 numpy
 tqdm
+pytest
