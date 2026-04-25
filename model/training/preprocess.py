@@ -47,7 +47,7 @@ def stream_tokenized_documents(
         if text:
             # Tokenize with endoftext separator
             tokens = tokenizer.encode_with_endoftext(text)
-            yield np.array(tokens, dtype=np.uint16)
+            yield np.array(tokens, dtype=np.uint32)
 
 
 def process_dataset(
