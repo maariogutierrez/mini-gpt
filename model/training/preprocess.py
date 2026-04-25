@@ -76,11 +76,11 @@ def process_dataset(
     tokenizer = Tokenizer()
     vocab_size = tokenizer.vocab_size
     
-    print(f"Vocab size: {vocab_size} (fits in uint32: {vocab_size < 65536})")
-    print(f"Output directory: {output_dir}")
+    print(f"Vocab size: {vocab_size} (fits in uint32: {vocab_size < 65536})", flush=True)
+    print(f"Output directory: {output_dir}", flush=True)
     
     # First pass: count total tokens to determine split point
-    print("\nFirst pass: counting total tokens...")
+    print("\nFirst pass: counting total tokens...", flush=True)
     total_tokens = 0
     num_documents = 0
     
@@ -90,13 +90,13 @@ def process_dataset(
     
     train_tokens_target = int(total_tokens * train_split)
     
-    print(f"Total documents: {num_documents}")
-    print(f"Total tokens: {total_tokens}")
-    print(f"Train target: {train_tokens_target} ({train_split*100:.0f}%)")
-    print(f"Val target: {total_tokens - train_tokens_target} ({(1-train_split)*100:.0f}%)")
+    print(f"Total documents: {num_documents}", flush=True)
+    print(f"Total tokens: {total_tokens}", flush=True)
+    print(f"Train target: {train_tokens_target} ({train_split*100:.0f}%)", flush=True)
+    print(f"Val target: {total_tokens - train_tokens_target} ({(1-train_split)*100:.0f}%)", flush=True)
     
     # Second pass: accumulate and save
-    print("\nSecond pass: writing binary files...")
+    print("\nSecond pass: writing binary files...", flush=True)
     
     train_tokens_written = 0
     val_tokens_written = 0
@@ -162,15 +162,15 @@ def process_dataset(
     os.truncate(val_bin_path, val_tokens_written * 2)  # *2 for uint32 (2 bytes)
     
     # Print summary
-    print(f"\n✓ Training split: {train_bin_path}")
-    print(f"  Tokens: {train_tokens_written:,}")
-    print(f"  Size: {train_bin_path.stat().st_size / (1024**3):.2f} GB")
+    print(f"\n✓ Training split: {train_bin_path}", flush=True)
+    print(f"  Tokens: {train_tokens_written:,}", flush=True)
+    print(f"  Size: {train_bin_path.stat().st_size / (1024**3):.2f} GB", flush=True)
     
-    print(f"\n✓ Validation split: {val_bin_path}")
-    print(f"  Tokens: {val_tokens_written:,}")
-    print(f"  Size: {val_bin_path.stat().st_size / (1024**3):.2f} GB")
+    print(f"\n✓ Validation split: {val_bin_path}", flush=True)
+    print(f"  Tokens: {val_tokens_written:,}", flush=True)
+    print(f"  Size: {val_bin_path.stat().st_size / (1024**3):.2f} GB", flush=True)
     
-    print(f"\nActual split: {train_tokens_written / (train_tokens_written + val_tokens_written) * 100:.1f}% train")
+    print(f"\nActual split: {train_tokens_written / (train_tokens_written + val_tokens_written) * 100:.1f}% train", flush=True)
 
 
 if __name__ == "__main__":
