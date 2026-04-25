@@ -158,8 +158,8 @@ def process_dataset(
     del val_mmap
     
     # Truncate files to actual size (remove padding)
-    os.truncate(train_bin_path, train_tokens_written * 2)  # *2 for uint32 (2 bytes)
-    os.truncate(val_bin_path, val_tokens_written * 2)  # *2 for uint32 (2 bytes)
+    os.truncate(train_bin_path, train_tokens_written * 4)  # *4 for uint32 (4 bytes)
+    os.truncate(val_bin_path, val_tokens_written * 4)  # *4 for uint32 (4 bytes)
     
     # Print summary
     print(f"\n✓ Training split: {train_bin_path}", flush=True)
