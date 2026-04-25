@@ -76,7 +76,7 @@ def process_dataset(
     tokenizer = Tokenizer()
     vocab_size = tokenizer.vocab_size
     
-    print(f"Vocab size: {vocab_size} (fits in uint32: {vocab_size < 65536})", flush=True)
+    print(f"Vocab size: {vocab_size} (fits in uint32: {vocab_size < 4294967296})", flush=True)
     print(f"Output directory: {output_dir}", flush=True)
     
     # First pass: count total tokens to determine split point
