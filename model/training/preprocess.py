@@ -33,7 +33,7 @@ def stream_tokenized_documents(
         split: Dataset split to use
         
     Yields:
-        Token arrays (uint16) for each document with endoftext token
+        Token arrays (uint32) for each document with endoftext token
     """
     tokenizer = Tokenizer()
     ds = load_dataset(dataset_name, split=split, streaming=True)
@@ -76,7 +76,7 @@ def process_dataset(
     tokenizer = Tokenizer()
     vocab_size = tokenizer.vocab_size
     
-    print(f"Vocab size: {vocab_size} (fits in uint16: {vocab_size < 65536})")
+    print(f"Vocab size: {vocab_size} (fits in uint32: {vocab_size < 65536})")
     print(f"Output directory: {output_dir}")
     
     # First pass: count total tokens to determine split point
@@ -100,11 +100,11 @@ def process_dataset(
     
     train_tokens_written = 0
     val_tokens_written = 0
-    chunk_buffer = np.array([], dtype=np.uint16)
+    chunk_buffer = np.array([], dtype=np.uint32)
     
     # Create empty files first
-    train_mmap = np.memmap(train_bin_path, dtype=np.uint16, mode="w+", shape=(train_tokens_target,))
-    val_mmap = np.memmap(val_bin_path, dtype=np.uint16, mode="w+", shape=(total_tokens - train_tokens_target,))
+    train_mmap = np.memmap(train_bin_path, dtype=np.uint32, mode="w+", shape=(train_tokens_target,))
+    val_mmap = np.memmap(val_bin_path, dtype=np.uint32, mode="w+", shape=(total_tokens - train_tokens_target,))
     
     pbar = tqdm(total=total_tokens, unit="tokens", desc="Processing")
     last_update = 0
@@ -126,7 +126,7 @@ def process_dataset(
                 val_chunk = chunk_buffer
                 val_mmap[val_tokens_written:val_tokens_written + len(val_chunk)] = val_chunk
                 val_tokens_written += len(val_chunk)
-                chunk_buffer = np.array([], dtype=np.uint16)
+                chunk_buffer = np.array([], dtype=np.uint32)
             
             update_amount = train_tokens_written + val_tokens_written - last_update
             pbar.update(update_amount)
@@ -158,8 +158,8 @@ def process_dataset(
     del val_mmap
     
     # Truncate files to actual size (remove padding)
-    os.truncate(train_bin_path, train_tokens_written * 2)  # *2 for uint16 (2 bytes)
-    os.truncate(val_bin_path, val_tokens_written * 2)  # *2 for uint16 (2 bytes)
+    os.truncate(train_bin_path, train_tokens_written * 2)  # *2 for uint32 (2 bytes)
+    os.truncate(val_bin_path, val_tokens_written * 2)  # *2 for uint32 (2 bytes)
     
     # Print summary
     print(f"\n✓ Training split: {train_bin_path}")
