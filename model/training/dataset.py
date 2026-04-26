@@ -1,3 +1,4 @@
+import torch
 import numpy as np
 from torch.utils.data import Dataset
 
@@ -31,6 +32,6 @@ class TokenDataset(Dataset):
                 x = tokens[idx : idx + block_size] (input context)
                 y = tokens[idx+1 : idx + block_size + 1] (next-token targets)
         """
-        x = self.tokens[idx : idx + self.block_size]
-        y = self.tokens[idx + 1 : idx + self.block_size + 1]
+        x = torch.from_numpy(self.tokens[idx : idx + self.block_size])
+        y = torch.from_numpy(self.tokens[idx + 1 : idx + self.block_size + 1])
         return x, y
