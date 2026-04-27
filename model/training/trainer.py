@@ -67,14 +67,14 @@ class Trainer:
             batch_size=batch_size,
             shuffle=True,
             pin_memory=True,
-            num_workers=2 if self.device == "cuda" else 0,
+            num_workers=0,
         )
         self.val_loader = DataLoader(
             val_dataset,
             batch_size=batch_size,
             shuffle=False,
             pin_memory=True,
-            num_workers=2 if self.device == "cuda" else 0,
+            num_workers=0,
         )
     
     def validate(self) -> float:
@@ -94,7 +94,7 @@ class Trainer:
                 num_batches += 1
         
         self.model.train()
-        return total_loss / num_batches if num_batches > 0 else 0.0
+        total_loss / num_batches if num_batches > 0 else 0.0
     
     def save_checkpoint(self, is_best: bool = False) -> str:
         checkpoint = {
