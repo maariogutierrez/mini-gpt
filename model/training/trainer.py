@@ -94,7 +94,7 @@ class Trainer:
                 num_batches += 1
         
         self.model.train()
-        total_loss / num_batches if num_batches > 0 else 0.0
+        return total_loss / num_batches if num_batches > 0 else 0.0
     
     def save_checkpoint(self, is_best: bool = False) -> str:
         checkpoint = {
