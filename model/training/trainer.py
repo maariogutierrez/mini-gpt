@@ -66,14 +66,14 @@ class Trainer:
             train_dataset,
             batch_size=batch_size,
             shuffle=True,
-            pin_memory=True,
+            pin_memory=(device == "cuda"),
             num_workers=0,
         )
         self.val_loader = DataLoader(
             val_dataset,
             batch_size=batch_size,
             shuffle=False,
-            pin_memory=True,
+            pin_memory=(device == "cuda"),
             num_workers=0,
         )
     
