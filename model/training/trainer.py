@@ -83,17 +83,22 @@ class Trainer:
 
         return torch.stack(xs, dim=0), torch.stack(ys, dim=0)
     
-    def validate(self) -> float:
+    def validate(self, max_batches: int = 100) -> float:
         self.model.eval()
         total_loss = 0.0
         num_batches = 0
 
         with torch.no_grad():
-            for start_idx in range(0, len(self.val_dataset), self.batch_size):
+            total_available = len(self.val_dataset)
+            total_batches = min(max_batches, (total_available + self.batch_size - 1) // self.batch_size)
+
+            for batch_idx in tqdm(range(total_batches), desc="Validation", leave=False):
+                start_idx = batch_idx * self.batch_size
+                end_idx = min(start_idx + self.batch_size, total_available)
+
                 batch_x = []
                 batch_y = []
-
-                for idx in range(start_idx, min(start_idx + self.batch_size, len(self.val_dataset))):
+                for idx in range(start_idx, end_idx):
                     x, y = self.val_dataset[idx]
                     batch_x.append(x)
                     batch_y.append(y)
