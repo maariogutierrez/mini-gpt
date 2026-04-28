@@ -1,10 +1,10 @@
 import torch
 import torch.nn as nn
 import wandb
-from torch.utils.data import DataLoader
 from torch.amp import GradScaler, autocast
 from pathlib import Path
 from datetime import datetime
+import random
 
 from model.architecture.gpt import GPT, GPTConfig 
 from model.training.loss import cross_entropy_loss
@@ -61,35 +61,49 @@ class Trainer:
         self.wandb_project = wandb_project
         self.global_step = 0
         self.best_val_loss = float('inf')
-        
-        self.train_loader = DataLoader(
-            train_dataset,
-            batch_size=batch_size,
-            shuffle=True,
-            pin_memory=(device == "cuda"),
-            num_workers=0,
-        )
-        self.val_loader = DataLoader(
-            val_dataset,
-            batch_size=batch_size,
-            shuffle=False,
-            pin_memory=(device == "cuda"),
-            num_workers=0,
-        )
+
+    def _sample_batch(self, dataset: TokenDataset):
+        dataset_size = len(dataset)
+        if dataset_size <= 0:
+            raise ValueError("Dataset is empty or block_size is too large for the data")
+
+        if self.batch_size == 1:
+            idx = random.randrange(dataset_size)
+            x, y = dataset[idx]
+            return x.unsqueeze(0), y.unsqueeze(0)
+
+        indices = torch.randint(0, dataset_size, (self.batch_size,))
+        xs = []
+        ys = []
+        for idx in indices.tolist():
+            x, y = dataset[idx]
+            xs.append(x)
+            ys.append(y)
+
+        return torch.stack(xs, dim=0), torch.stack(ys, dim=0)
     
     def validate(self) -> float:
         self.model.eval()
         total_loss = 0.0
         num_batches = 0
-        
+
         with torch.no_grad():
-            for x, y in self.val_loader:
-                x, y = x.to(self.device), y.to(self.device)
-                
+            for start_idx in range(0, len(self.val_dataset), self.batch_size):
+                batch_x = []
+                batch_y = []
+
+                for idx in range(start_idx, min(start_idx + self.batch_size, len(self.val_dataset))):
+                    x, y = self.val_dataset[idx]
+                    batch_x.append(x)
+                    batch_y.append(y)
+
+                x = torch.stack(batch_x, dim=0).to(self.device)
+                y = torch.stack(batch_y, dim=0).to(self.device)
+
                 with autocast(device_type=self.device, enabled=self.use_mixed_precision):
                     logits = self.model(x)
                     loss = cross_entropy_loss(logits, y)
-                
+
                 total_loss += loss.item()
                 num_batches += 1
         
@@ -128,19 +142,13 @@ class Trainer:
         wandb.init(project=self.wandb_project, name=f"mini-gpt-{datetime.now().strftime('%Y%m%d_%H%M%S')}")
         
         self.model.train()
-        train_iter = iter(self.train_loader)
-        
+
         while self.global_step < self.max_steps:
             self.optimizer.zero_grad(set_to_none=True) 
             accum_loss = 0.0
             
             for _ in range(self.accum_steps):
-                try:
-                    x, y = next(train_iter)
-                except StopIteration:
-                    train_iter = iter(self.train_loader)
-                    x, y = next(train_iter)
-                
+                x, y = self._sample_batch(self.train_dataset)
                 x, y = x.to(self.device), y.to(self.device)
                 
                 with autocast(device_type=self.device, enabled=self.use_mixed_precision):
