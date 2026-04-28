@@ -5,6 +5,7 @@ from torch.amp import GradScaler, autocast
 from pathlib import Path
 from datetime import datetime
 import random
+from tqdm.auto import tqdm
 
 from model.architecture.gpt import GPT, GPTConfig 
 from model.training.loss import cross_entropy_loss
