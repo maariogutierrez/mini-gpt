@@ -106,5 +106,9 @@ class GPT(nn.Module):
             
             if temperature != 1.0:
                 logits = logits / temperature
+            
+            probs = torch.softmax(logits, dim=-1)
+            next_token = torch.multinomial(probs, num_samples=1)
+            idx = torch.cat((idx, next_token), dim=1)
         
         return idx
