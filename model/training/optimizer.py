@@ -21,7 +21,7 @@ def create_optimizer(model, learning_rate=1e-4, weight_decay=0.01):
         {"params": no_decay_params, "weight_decay": 0.0},
     ]
     
-    optimizer = AdamW(param_groups, lr=learning_rate)
+    optimizer = AdamW(param_groups, lr=learning_rate, betas=(0.9, 0.95))
     return optimizer
 
 

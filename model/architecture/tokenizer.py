@@ -6,7 +6,7 @@ class CustomTokenizer:
     
     ENDOFTEXT_TOKEN = "[END]"
     
-    def __init__(self, encoding_name: str = "cl100k_base"):
+    def __init__(self, encoding_name: str = "gpt2"):
         self.encoding = tiktoken.get_encoding(encoding_name)
         self._vocab_size = self.encoding.n_vocab
         self._endoftext_id = self.encoding.encode(

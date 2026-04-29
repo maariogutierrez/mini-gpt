@@ -39,7 +39,7 @@ def process_dataset(
                 continue
             
             tokens = tokenizer.encode_with_endoftext(text)
-            token_arr = np.array(tokens, dtype=np.uint32)
+            token_arr = np.array(tokens, dtype=np.uint16)
             
             if random.random() < train_split:
                 f_train.write(token_arr.tobytes())
