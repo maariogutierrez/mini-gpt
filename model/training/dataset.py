@@ -6,7 +6,7 @@ from torch.utils.data import Dataset
 class TokenDataset(Dataset):
     def __init__(self, bin_path, block_size):
         self.block_size = block_size
-        self.tokens = np.memmap(bin_path, dtype=np.uint16, mode='r')
+        self.tokens = np.memmap(bin_path, dtype=np.uint32, mode='r')
     
     def __len__(self):
         return len(self.tokens) - self.block_size

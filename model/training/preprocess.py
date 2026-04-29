@@ -2,7 +2,6 @@ import os
 import numpy as np
 import random
 from pathlib import Path
-from typing import Generator
 from tqdm import tqdm
 from datasets import load_dataset
 
@@ -40,7 +39,7 @@ def process_dataset(
                 continue
             
             tokens = tokenizer.encode_with_endoftext(text)
-            token_arr = np.array(tokens, dtype=np.uint16)
+            token_arr = np.array(tokens, dtype=np.uint32)
             
             if random.random() < train_split:
                 f_train.write(token_arr.tobytes())
