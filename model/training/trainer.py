@@ -122,7 +122,7 @@ class Trainer:
             'model_state_dict': self.model.state_dict(),
             'optimizer_state_dict': self.optimizer.state_dict(),
             'scheduler_state_dict': self.scheduler.state_dict(),
-            'best_val_loss': self.best_val_loss,
+            'best_val_loss': self.best_val_loss
         }
         
         checkpoint_path = self.checkpoint_dir / f"checkpoint_step_{self.global_step}.pt"
@@ -131,8 +131,12 @@ class Trainer:
         if is_best:
             best_path = self.checkpoint_dir / "best_model.pt"
             torch.save(checkpoint, best_path)
+            artifact = wandb.Artifact(name="gpt-best-model", type="model")
+            artifact.add_file(str(best_path))
+            wandb.log_artifact(artifact)
             print(f"Saved best model to {best_path}")
         
+        wandb.save(str(checkpoint_path))
         return str(checkpoint_path)
     
     def load_checkpoint(self, checkpoint_path: str) -> None:
@@ -145,7 +149,7 @@ class Trainer:
         print(f"Loaded checkpoint from {checkpoint_path} at step {self.global_step}")
     
     def train(self) -> None:
-        wandb.init(project=self.wandb_project, name=f"mini-gpt-{datetime.now().strftime('%Y%m%d_%H%M%S')}")
+        wandb.init(project=self.wandb_project, id='mini-gpt-training', resume="allow", name=f"mini-gpt-{datetime.now().strftime('%Y%m%d_%H%M%S')}")
         
         self.model.train()
 
