@@ -16,7 +16,7 @@ class CustomTokenizer:
     def encode(self, text: str) -> List[int]:
         if not text:
             return []
-        return self.encoding.encode(text).ids
+        return self.encoding.encode(text)
     
     def decode(self, tokens: List[int]) -> str:
         if not tokens:
