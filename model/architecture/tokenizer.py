@@ -1,27 +1,27 @@
 from typing import List
-from tokenizers import Tokenizer
-from pathlib import Path
+import tiktoken
 
 
 class CustomTokenizer:
     
     ENDOFTEXT_TOKEN = "[END]"
     
-    def __init__(self):
-        tokenizer_path = Path(__file__).parent.parent / "architecture" / "tokenizer" / "mini-gpt-tokenizer.json"
-        self.tokenizer = Tokenizer.from_file(str(tokenizer_path))
-        self._vocab_size = self.tokenizer.get_vocab_size()
-        self._endoftext_id = self.tokenizer.token_to_id(self.ENDOFTEXT_TOKEN)
+    def __init__(self, encoding_name: str = "cl100k_base"):
+        self.encoding = tiktoken.get_encoding(encoding_name)
+        self._vocab_size = self.encoding.n_vocab
+        self._endoftext_id = self.encoding.encode(
+            self.ENDOFTEXT_TOKEN, allowed_special={self.ENDOFTEXT_TOKEN}
+        )[0]
     
     def encode(self, text: str) -> List[int]:
         if not text:
             return []
-        return self.tokenizer.encode(text).ids
+        return self.encoding.encode(text).ids
     
     def decode(self, tokens: List[int]) -> str:
         if not tokens:
             return ""
-        return self.tokenizer.decode(tokens)
+        return self.encoding.decode(tokens)
     
     @property
     def vocab_size(self) -> int:
