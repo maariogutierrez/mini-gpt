@@ -41,7 +41,9 @@ class GPT(nn.Module):
         self.final_ln = nn.LayerNorm(config.n_embd)
         
         # embedding dimension → vocabulary size
-        self.lm_head = nn.Linear(config.n_embd, config.vocab_size)
+        self.lm_head = nn.Linear(config.n_embd, config.vocab_size, bias=False)
+
+        self.token_emb.weight = self.lm_head.weight
         
         self._init_weights()
         
@@ -49,14 +51,18 @@ class GPT(nn.Module):
     
     def _init_weights(self):
         for name, param in self.named_parameters():
+            if 'token_emb' in name:
+                continue
+            if 'norm' in name:
+                continue
             if param.dim() >= 2:
                 nn.init.normal_(param, mean=0.0, std=0.02)
             elif 'bias' in name or 'norm' in name:
                 nn.init.zeros_(param)
     
     def _print_model_info(self):
-        total_params = sum(p.numel() for p in self.parameters())
-        trainable_params = sum(p.numel() for p in self.parameters() if p.requires_grad)
+        total_params = sum(p.numel() for p in set(self.parameters()))
+        trainable_params = sum(p.numel() for p in set(self.parameters()) if p.requires_grad)
         
         print(f"GPT Model Information:")
         print(f"  Total parameters: {total_params:,}")
@@ -94,7 +100,7 @@ class GPT(nn.Module):
     
     @torch.no_grad()
     def generate(self, idx: torch.Tensor, max_new_tokens: int, 
-                 temperature: float = 1.0) -> torch.Tensor:
+                 temperature: float = 1.0, top_k: int = None) -> torch.Tensor:
         for _ in range(max_new_tokens):
             seq_len = idx.shape[1]
             
@@ -106,6 +112,10 @@ class GPT(nn.Module):
             
             if temperature != 1.0:
                 logits = logits / temperature
+
+            if top_k is not None:
+                v, _ = torch.topk(logits, min(top_k, logits.size(-1)))
+                logits[logits < v[:, [-1]]] = -float('Inf')
             
             probs = torch.softmax(logits, dim=-1)
             next_token = torch.multinomial(probs, num_samples=1)

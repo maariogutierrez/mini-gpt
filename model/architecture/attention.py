@@ -21,6 +21,7 @@ class CausalSelfAttention(nn.Module):
         self.out_proj = nn.Linear(config.embed_dim, config.embed_dim)
         
         self.attn_dropout = nn.Dropout(config.dropout)
+        self.resid_dropout = nn.Dropout(config.dropout)
         
         max_seq_len = getattr(config, 'max_seq_len', 2048)
         causal_mask = torch.tril(torch.ones(max_seq_len, max_seq_len)) == 1
@@ -63,5 +64,6 @@ class CausalSelfAttention(nn.Module):
         attn_output = attn_output.view(B, T, C)
         
         output = self.out_proj(attn_output)
+        output = self.resid_dropout(output)
         
         return output
